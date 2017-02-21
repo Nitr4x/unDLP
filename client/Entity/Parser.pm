@@ -1,15 +1,13 @@
+#!/usr/bin/perl
+
 package Parser;
 
 use Getopt::Long;
 use Moose;
+use strict;
+use warnings;
 
 has delay => (
-    is      =>  'rw',
-    isa     =>  'Int',
-    default =>  0
-);
-
-has encryption => (
     is      =>  'rw',
     isa     =>  'Int',
     default =>  0
@@ -20,16 +18,15 @@ has file => (
     isa =>  'Str'
 );
 
+has dest => (
+    is  =>  'rw',
+    isa =>  'Str'
+);
+
 has help => (
     is      =>  'rw',
     isa     =>  'Int',
     default =>  0
-);
-
-has key => (
-    is      =>  'rw',
-    isa     =>  'Str',
-    default =>  ''
 );
 
 sub parse {
@@ -38,23 +35,24 @@ sub parse {
 
     GetOptions(
         'delay=i' => \$self->{delay},
-        'e' => \$self->{encryption},
-        'key=s' => \$self->{key},
+        'f=s' => \$self->{file},
+        'd=s' => \$self->{dest},
         'help|h' => \$self->{help}
     );
 
     $self->{file} = $args[0];
 
-    if (scalar @args < 1 || $self->help || !$self->file) {
+    if (scalar @args < 1 || $self->help || !$self->file || !$self->dest) {
         usage()
     }
 }
 
 sub usage {
-    print "\nusage: unDLP.pl FILE [-e] [-delay DELAY] [-key KEY] [--help]\n\n";
-    print "\t -e: Cipher the provided file.\n";
-    print "\t -delay: Set the transfer speed.\n";
-    print "\t -key: Set the public key used for the encryption. If not specified, the key will be retrieved from the server.\n";
+    print "\nusage: unDLP.pl -f FILE -d DESTINATION [--delay DELAY] [--help|h]\n\n";
+    print "\t -f: File to transfer.\n";
+    print "\t -d: Destination.\n";
+    print "\t --delay: Set the transfer speed.\n";
+    print "\t --help|h: Display the helper.\n";
 
     exit;
 }
