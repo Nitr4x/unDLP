@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 
-use LWP::Simple;
 use strict;
 use warnings;
 
+require Entity::ExfiltrationEngine;
 require Entity::Parser;
 
 print "
@@ -22,9 +22,7 @@ Maintained by Nitrax <nitrax\@lokisec.fr>
 ";
 
 my $parser = Parser->new();
+my $engine = ExfiltrationEngine->new();
 
 $parser->parse(@ARGV);
-
-my $content = get $parser->dest;
-
-print $content;
+$engine->exfiltrate($parser->dest);
