@@ -15,12 +15,6 @@ has encryption => (
     default =>  0
 );
 
-has key => (
-    is      =>  'rw',
-    isa     =>  'Str',
-    default =>  ''
-);
-
 has file => (
     is  =>  'rw',
     isa =>  'Str'
@@ -30,6 +24,12 @@ has help => (
     is      =>  'rw',
     isa     =>  'Int',
     default =>  0
+);
+
+has key => (
+    is      =>  'rw',
+    isa     =>  'Str',
+    default =>  ''
 );
 
 sub parse {
