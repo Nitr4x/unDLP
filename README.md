@@ -1,2 +1,3 @@
 # unDLP
-Discreetly exfiltrate information via the ICMP protocol.
+
+Discreetly exfiltrate information via the HTTPS protocol.
