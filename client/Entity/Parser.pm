@@ -40,8 +40,6 @@ sub parse {
         'help|h' => \$self->{help}
     );
 
-    $self->{file} = $args[0];
-
     if (scalar @args < 1 || $self->help || !$self->file || !$self->dest) {
         usage()
     }
