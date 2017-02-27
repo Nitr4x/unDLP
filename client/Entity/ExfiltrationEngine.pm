@@ -3,8 +3,6 @@
 package ExfiltrationEngine;
 
 use Moose;
-use strict;
-use warnings;
 
 has file => (
     is  =>  'rw'
@@ -20,10 +18,17 @@ has delay => (
     isa =>  'Int'
 );
 
-sub loadFile {
+sub load {
+    my($self, $file) = @_;
+
+    open $self->{file}, '<', $file or die $!;
+    binmode $self->file;
+}
+
+sub close {
     my $self = shift;
 
-    open $self->{file}, '<', $self->file or die $!;
+    close($self->file);
 }
 
 1;
