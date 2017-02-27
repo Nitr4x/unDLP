@@ -4,8 +4,9 @@ package ExfiltrationEngine;
 
 use Moose;
 
-has file => (
-    is  =>  'rw'
+has delay => (
+    is  =>  'rw',
+    isa =>  'Int'
 );
 
 has dest => (
@@ -13,7 +14,11 @@ has dest => (
     isa =>  'Str'
 );
 
-has delay => (
+has file => (
+    is  =>  'rw'
+);
+
+has size => (
     is  =>  'rw',
     isa =>  'Int'
 );

