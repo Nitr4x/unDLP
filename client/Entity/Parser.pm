@@ -49,7 +49,7 @@ sub usage {
     print "\nusage: unDLP.pl -f FILE -d DESTINATION [--delay DELAY] [--help|h]\n\n";
     print "\t -f: File to transfer.\n";
     print "\t -d: Destination.\n";
-    print "\t --delay: Set the transfer speed.\n";
+    print "\t --delay: Set the transfer speed (second).\n";
     print "\t --help|h: Display the helper.\n";
 
     exit;

