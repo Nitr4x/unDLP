@@ -41,6 +41,8 @@ sub exfiltrate {
 
         $res = $userAgent->request($request);
     }
+
+    $self->SUPER::close();
 }
 
 1;
