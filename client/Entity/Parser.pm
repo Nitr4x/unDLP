@@ -13,12 +13,12 @@ has delay => (
     default =>  0
 );
 
-has file => (
+has dest => (
     is  =>  'rw',
     isa =>  'Str'
 );
 
-has dest => (
+has file => (
     is  =>  'rw',
     isa =>  'Str'
 );
@@ -29,14 +29,21 @@ has help => (
     default =>  0
 );
 
+has size => (
+    is      =>  'rw',
+    isa     =>  'Int',
+    default =>  1024
+);
+
 sub parse {
     my $self = shift;
     my @args = @_;
 
     GetOptions(
-        'delay=i' => \$self->{delay},
         'f=s' => \$self->{file},
         'd=s' => \$self->{dest},
+        'delay=i' => \$self->{delay},
+        'size=i' => \$self->{size},
         'help|h' => \$self->{help}
     );
 
@@ -49,6 +56,7 @@ sub usage {
     print "\nusage: unDLP.pl -f FILE -d DESTINATION [--delay DELAY] [--help|h]\n\n";
     print "\t -f: File to transfer.\n";
     print "\t -d: Destination.\n";
+    print "\t --size: Set the transfer size.\n";
     print "\t --delay: Set the transfer speed (second).\n";
     print "\t --help|h: Display the helper.\n";
 
