@@ -2,6 +2,7 @@
 
 package ExfiltrationEngine;
 
+use File::stat;
 use Moose;
 
 has delay => (
@@ -28,6 +29,8 @@ sub load {
 
     open $self->{file}, '<', $file or die $!;
     binmode $self->file;
+
+    return stat($file)->size;
 }
 
 sub close {
