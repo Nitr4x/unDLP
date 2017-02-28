@@ -73,6 +73,8 @@ sub exfiltrate {
 
     sendData($request, $userAgent, $file, '', $id, $END_TRANSFER);
 
+    print "\n";
+
     $self->SUPER::close();
 }
 

@@ -18,9 +18,14 @@ has dest => (
     isa =>  'Str'
 );
 
-has file => (
+has files => (
     is  =>  'rw',
-    isa =>  'Str'
+    isa =>  'ArrayRef[Str]',
+    traits  =>  ['Array'],
+    default =>  sub { [] },
+    handles =>  {
+        getFiles => "elements"
+    }
 );
 
 has help => (
@@ -46,7 +51,7 @@ sub parse {
     my @args = @_;
 
     GetOptions(
-        'f=s' => \$self->{file},
+        'f=s{1,}' => $self->{files},
         'd=s' => \$self->{dest},
         'm=s' => \$self->{method},
         'delay=i' => \$self->{delay},
@@ -54,7 +59,7 @@ sub parse {
         'help|h' => \$self->{help}
     );
 
-    if (scalar @args < 1 || $self->help || !$self->file || !$self->dest || !$self->method) {
+    if (scalar @args < 1 || $self->help || scalar $self->getFiles == 0 || !$self->dest || !$self->method) {
         usage()
     }
 }
