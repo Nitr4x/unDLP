@@ -19,8 +19,8 @@ has dest => (
 );
 
 has files => (
-    is  =>  'rw',
-    isa =>  'ArrayRef[Str]',
+    is      =>  'rw',
+    isa     =>  'ArrayRef[Str]',
     traits  =>  ['Array'],
     default =>  sub { [] },
     handles =>  {

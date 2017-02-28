@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+use Crypt::PK::RSA;
 use HTTP::Daemon;
 use HTTP::Status;
 use JSON;
@@ -19,12 +20,14 @@ my $server = HTTP::Daemon->new (
     LocalPort => 443,
 );
 
-my (@files, $content, $index);
+my $pk = Crypt::PK::RSA->new('private.pem');
+
+my(@files, $content, $index);
 
 while (my $client = $server->accept) {
     while (my $req = $client->get_request) {
         if ($req->method eq 'POST' and $req->uri->path eq "/") {
-            $content = decode_json $req->content;
+            $content = decode_json $pk->decrypt($req->content, 'v1.5');
 
             if ($content->{state} eq $START_TRANSFER) {
                 push @files, {id => $content->{id}, file => $content->{file}, buffer => ''};
@@ -39,6 +42,17 @@ while (my $client = $server->accept) {
             }
 
             $client->send_response('ok');
+        } elsif ($req->method eq 'GET' and $req->uri->path eq "/") {
+            my($n, $data, $buffer);
+
+            open FILE, "<", "public.pem" or die $!;
+
+            $buffer = '';
+            while (($n = read FILE, $data, 1024) != 0) {
+                $buffer .= $data;
+            }
+
+            $client->send($buffer);
         } else {
             $client->send_error(RC_FORBIDDEN)
         }
