@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use threads;
 use warnings;
 
 require Entity::Parser;
@@ -38,4 +39,8 @@ for my $method (@factory) {
     }
 }
 
-$engine->exfiltrate($parser->file);
+my $thr = threads->create(sub {
+    $engine->exfiltrate($parser->file)
+});
+
+$thr->join();
