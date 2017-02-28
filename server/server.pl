@@ -19,7 +19,7 @@ my $server = HTTP::Daemon->new (
     LocalPort => 443,
 );
 
-my (@files, $content);
+my (@files, $content, $index);
 
 while (my $client = $server->accept) {
     while (my $req = $client->get_request) {
@@ -28,12 +28,9 @@ while (my $client = $server->accept) {
 
             if ($content->{state} eq $START_TRANSFER) {
                 push @files, {id => $content->{id}, file => $content->{file}, buffer => ''};
-            } elsif ($content->{state} eq $IN_TRANSFER) {
-                my $index = firstidx { $_->{id} eq $content->{id} } @files;
+            } elsif ($content->{state} eq $IN_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
                 $files[$index]->{buffer} .= $content->{data};
-            } elsif ($content->{state} eq $END_TRANSFER) {
-                my $index = firstidx { $_->{id} eq $content->{id} } @files;
-
+            } elsif ($content->{state} eq $END_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
                 open FILE, ">$files[$index]->{file}" or die $!;
                 print FILE $files[$index]->{buffer};
                 close FILE;
