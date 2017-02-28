@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-use Parallel::ForkManager;
 use strict;
 use warnings;
 
