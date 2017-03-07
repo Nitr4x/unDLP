@@ -1,9 +1,8 @@
 #!/usr/bin/perl
 
 use Crypt::AES::CTR;
-
-use HTTP::Daemon;
 use HTTP::Status;
+use IO::Socket::SSL;
 use JSON;
 use List::MoreUtils qw(firstidx);
 use Readonly;
@@ -18,48 +17,78 @@ Readonly my $END_TRANSFER => -1;
 
 $| = 1;
 
-my $server = HTTP::Daemon->new (
-    LocalAddr => 'localhost',
-    LocalPort => 443,
-);
-
 my $parser = Parser->new();
 
 $parser->parse(@ARGV);
 
+my $server = IO::Socket::SSL->new(
+    LocalAddr => 'localhost',
+    LocalPort   =>  443,
+    Listen => 10,
+    SSL_cert_file => 'cert/server.crt',
+    SSL_key_file => 'cert/server.key',
+);
+
 my(@files, $content, $index);
+
 while (my $client = $server->accept) {
-    while (my $req = $client->get_request) {
-        if ($req->method eq 'POST' and $req->uri->path eq "/") {
+    local $/ = Socket::CRLF;
+    my %request = ();
+    my %data;
 
-            my $hash = isJSON($req->content) eq 1 ? $req->content :
-                $parser->encryptionKey ? Crypt::AES::CTR::decrypt($req->content, $parser->encryptionKey, 256) : $req->content;
+    $client->autoflush(1);
 
-            if (isJSON($hash) eq 1) {
-                $content = decode_json $hash;
+    while (<$client>) {
+        chomp;
 
-                if ($content->{state} eq $START_TRANSFER) {
-                    push @files, {id => $content->{id}, file => $content->{file}, buffer => ''};
-                } elsif ($content->{state} eq $IN_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
-                    $files[$index]->{buffer} .= $content->{data};
-                } elsif ($content->{state} eq $END_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
-                    open FILE, ">$files[$index]->{file}" or die $!;
-                    print FILE $files[$index]->{buffer};
-                    close FILE;
+        if (/\s*(\w+)\s*([^\s]+)\s*HTTP\/(\d.\d)/) {
+            $request{METHOD} = uc $1;
+            $request{URL} = $2;
+            $request{HTTP_VERSION} = $3;
+        } elsif (/:/) {
+            my($type, $val) = split /:/, $_, 2;
 
-                    splice(@files, $index);
-                }
-
-                $client->send_response('ok');
+            $type =~ s/^\s+//;
+            foreach ($type, $val) {
+                s/^\s+//;
+                s/\s+$//;
             }
-        } else {
-            $client->send_error(RC_FORBIDDEN)
+
+            $request{lc $type} = $val;
+        } elsif (/^$/) {
+            read($client, $request{CONTENT}, $request{'content-length'})
+
+            if defined $request{'content-length'};
+            last;
         }
     }
 
-    $client->close;
+    if ($request{METHOD} eq 'POST') {
+        my $hash = isJSON($request{CONTENT}) eq 1 ? $request{CONTENT} :
+            $parser->encryptionKey ? Crypt::AES::CTR::decrypt($request{CONTENT}, $parser->encryptionKey, 256) : $request{CONTENT};
 
-    undef($client);
+        if (isJSON($hash) eq 1) {
+            $content = decode_json $hash;
+
+            if ($content->{state} eq $START_TRANSFER) {
+                push @files, {id => $content->{id}, file => $content->{file}, buffer => ''};
+            } elsif ($content->{state} eq $IN_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
+                $files[$index]->{buffer} .= $content->{data};
+            } elsif ($content->{state} eq $END_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
+                open FILE, ">$files[$index]->{file}" or die $!;
+                print FILE $files[$index]->{buffer};
+                close FILE;
+
+                splice(@files, $index);
+            }
+
+            print $client 200;
+        }
+    } else {
+        print $client 400;
+    }
+
+    close $client;
 }
 
 sub isJSON {
