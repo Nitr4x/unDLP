@@ -16,7 +16,7 @@ sub create {
 
     for my $method (@factory) {
         if ($method->{name} eq $parser->method) {
-            return $method->{className}->new(dest => $parser->dest, delay => $parser->delay, size => $parser->size);
+            return $method->{className}->new(dest => $parser->dest, delay => $parser->delay, size => $parser->size, encryptionKey => $parser->encryptionKey);
         }
     }
 }

