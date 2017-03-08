@@ -1,7 +1,11 @@
 #!/usr/bin/perl
 
+package Main;
+
 use strict;
 use warnings;
+
+our $VERSION = '1.0';
 
 require Entity::ModuleFactory;
 require Entity::Parser;

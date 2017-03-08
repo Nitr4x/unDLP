@@ -1,21 +1,31 @@
 #!/usr/bin/perl
 
+package Main;
+
+use Carp;
 use Crypt::AES::CTR;
-use HTTP::Status;
 use IO::Socket::SSL;
-use JSON;
-use List::MoreUtils qw(firstidx);
-use Readonly;
+use JSON::MaybeXS;
+use List::SomeUtils qw(firstidx);
 use strict;
 use warnings;
 
+our $VERSION = '1.0';
+
 require Entity::Parser;
 
-Readonly my $START_TRANSFER => 1;
-Readonly my $IN_TRANSFER => 0;
-Readonly my $END_TRANSFER => -1;
+use constant START_TRANSFER => 1;
+use constant IN_TRANSFER    => 0;
+use constant END_TRANSFER   => -1;
 
 $| = 1;
+
+sub isJSON {
+    my $str = shift;
+    my @chars = split("", $str);
+
+    return $chars[0] eq '{' and $chars[length($str) - 1] eq '}' ? 1 : 0;
+}
 
 my $parser = Parser->new();
 
@@ -70,14 +80,14 @@ while (my $client = $server->accept) {
         if (isJSON($hash) eq 1) {
             $content = decode_json $hash;
 
-            if ($content->{state} eq $START_TRANSFER) {
+            if ($content->{state} eq START_TRANSFER) {
                 push @files, {id => $content->{id}, file => $content->{file}, buffer => ''};
-            } elsif ($content->{state} eq $IN_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
+            } elsif ($content->{state} eq IN_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
                 $files[$index]->{buffer} .= $content->{data};
-            } elsif ($content->{state} eq $END_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
-                open FILE, ">$files[$index]->{file}" or die $!;
-                print FILE $files[$index]->{buffer};
-                close FILE;
+            } elsif ($content->{state} eq END_TRANSFER && ($index = firstidx { $_->{id} eq $content->{id} } @files)!= -1) {
+                open my $FILE, '>', $files[$index]->{file} or croak "File [$files[$index]->{file}] cannot be created\n";
+                print $FILE $files[$index]->{buffer};
+                close $FILE;
 
                 splice(@files, $index);
             }
@@ -89,11 +99,4 @@ while (my $client = $server->accept) {
     }
 
     close $client;
-}
-
-sub isJSON {
-    my $str = shift;
-    my @chars = split("", $str);
-
-    return $chars[0] eq '{' and $chars[length($str) - 1] eq '}' ? 1 : 0;
 }
