@@ -1,5 +1,11 @@
 #!/usr/bin/perl
 
+# ---------------------------------------------- #
+#                                                #
+# The Parser package parse the unDLP arguments.  #
+#                                                #
+# ---------------------------------------------- #
+
 package Parser;
 
 use Getopt::Long;
@@ -49,6 +55,9 @@ has encryptionKey => (
     default =>  ''
 );
 
+#
+# Parse the command line arguments.
+#
 sub parse {
     my $self = shift;
     my @args = @_;
@@ -68,8 +77,11 @@ sub parse {
     }
 }
 
+#
+# Display the unDLP usage.
+#
 sub usage {
-    print "\nusage: unDLP.pl -f FILE -d DESTINATION -m [HTTPS] [--e PASSWORD] [--size SIZE] [--delay DELAY] [--help|h]\n\n";
+    print "\nusage: unDLP.pl -f [FILE, ...] -d DESTINATION -m [HTTPS] [--e PASSWORD] [--size SIZE] [--delay DELAY] [--help|h]\n\n";
     print "\t -f: File to transfer.\n";
     print "\t -d: Destination.\n";
     print "\t -m: Exfiltration method.\n";

@@ -1,5 +1,11 @@
 #!/usr/bin/perl
 
+# ----------------------------------------------- #
+#                                                 #
+# The Parser package parse the server arguments.  #
+#                                                 #
+# ----------------------------------------------- #
+
 package Parser;
 
 use Getopt::Long;
@@ -17,6 +23,9 @@ has encryptionKey => (
     default =>  ''
 );
 
+#
+# Parse the command line arguments.
+#
 sub parse {
     my $self = shift;
     my @args = @_;
@@ -31,9 +40,12 @@ sub parse {
     }
 }
 
+#
+# Display the server usage.
+#
 sub usage {
     print "\nusage: server.pl [--e PASSWORD] [--help|h]\n\n";
-    print "\t --e: Set the encryption password.\n";
+    print "\t --e: Set the decryption password.\n";
     print "\t --help|h: Display the helper.\n";
 
     exit;
