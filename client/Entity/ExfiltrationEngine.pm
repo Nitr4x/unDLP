@@ -70,7 +70,7 @@ sub closeFile {
 sub encrypt {
     my($self, $data) = @_;
 
-    return Crypt::AES::CTR::encrypt($data, $self->encryptionKey, @{[ SIZE ]});
+    return Crypt::AES::CTR::encrypt($data, $self->encryptionKey, SIZE);
 }
 
 1;

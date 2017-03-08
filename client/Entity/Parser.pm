@@ -81,7 +81,7 @@ sub parse {
 # Display the unDLP usage.
 #
 sub usage {
-    print "\nusage: unDLP.pl -f FILE -d DESTINATION -m [HTTPS] [--e PASSWORD] [--size SIZE] [--delay DELAY] [--help|h]\n\n";
+    print "\nusage: unDLP.pl -f [FILE, ...] -d DESTINATION -m [HTTPS] [--e PASSWORD] [--size SIZE] [--delay DELAY] [--help|h]\n\n";
     print "\t -f: File to transfer.\n";
     print "\t -d: Destination.\n";
     print "\t -m: Exfiltration method.\n";

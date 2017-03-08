@@ -45,7 +45,7 @@ sub parse {
 #
 sub usage {
     print "\nusage: server.pl [--e PASSWORD] [--help|h]\n\n";
-    print "\t --e: Set the encryption password.\n";
+    print "\t --e: Set the decryption password.\n";
     print "\t --help|h: Display the helper.\n";
 
     exit;

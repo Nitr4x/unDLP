@@ -21,9 +21,10 @@ our $VERSION = '1.0';
 
 require Entity::Parser;
 
-use constant START_TRANSFER => 1;
-use constant IN_TRANSFER    => 0;
-use constant END_TRANSFER   => -1;
+use constant START_TRANSFER =>  1;
+use constant IN_TRANSFER    =>  0;
+use constant END_TRANSFER   =>  -1;
+use constant SIZE           =>  256;
 
 $| = 1;
 
@@ -33,8 +34,15 @@ $| = 1;
 sub isJSON {
     my $str = shift;
     my @chars = split("", $str);
+    my $res;
 
-    return $chars[0] eq '{' and $chars[length($str) - 1] eq '}' ? 1 : 0;
+    if ($chars[0] eq '{' and $chars[length($str) - 1] eq '}') {
+        $res = 1;
+    } else {
+        $res = 0
+    }
+
+    return $res;
 }
 
 my $parser = Parser->new();
@@ -85,7 +93,7 @@ while (my $client = $server->accept) {
 
     if ($request{METHOD} eq 'POST') {
         my $hash = isJSON($request{CONTENT}) eq 1 ? $request{CONTENT} :
-            $parser->encryptionKey ? Crypt::AES::CTR::decrypt($request{CONTENT}, $parser->encryptionKey, 256) : $request{CONTENT};
+            $parser->encryptionKey ? Crypt::AES::CTR::decrypt($request{CONTENT}, $parser->encryptionKey, SIZE) : $request{CONTENT};
 
         if (isJSON($hash) eq 1) {
             $content = decode_json $hash;

