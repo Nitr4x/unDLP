@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+# ------------------------------------------------------------------------- #
+#                                                                           #
+# The ModuleFactory package dynamically instantiate the exfiltration method #
+# specified in argument.                                                    #
+#                                                                           #
+# ------------------------------------------------------------------------- #
+
 package ModuleFactory;
 
 use Moose;
@@ -7,6 +14,9 @@ use Moose;
 require Entity::Parser;
 require Module::HTTPSExfiltration;
 
+#
+# Instantiate and return the right exfiltration method.
+#
 sub create {
     my($self, $parser) = @_;
 

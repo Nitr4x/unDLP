@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+# ---------------------------------------------------------------------------- #
+#                                                                              #
+# The ExfiltrationEngine package is the parent class to any other exfiltration #
+# methods.                                                                     #
+#                                                                              #
+# ---------------------------------------------------------------------------- #
+
 package ExfiltrationEngine;
 
 use Carp;
@@ -34,6 +41,9 @@ has encryptionKey => (
     isa =>  'Str'
 );
 
+#
+# Load the file to transfer.
+#
 sub loadFile {
     my($self, $file) = @_;
 
@@ -43,6 +53,9 @@ sub loadFile {
     return stat($file)->size;
 }
 
+#
+# Close the file.
+#
 sub closeFile {
     my $self = shift;
 
@@ -51,6 +64,9 @@ sub closeFile {
     return;
 }
 
+#
+# Encrypt the given data using AES algorithm and the CTR cipher mode.
+#
 sub encrypt {
     my($self, $data) = @_;
 

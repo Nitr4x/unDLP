@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+# ------------------------------------------------------------------------- #
+#                                                                           #
+# Main package, instantiating the parser and calling the right exfiltration #
+# method.                                                                   #
+#                                                                           #
+# ------------------------------------------------------------------------- #
+
 package Main;
 
 use strict;

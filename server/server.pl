@@ -1,5 +1,12 @@
 #!/usr/bin/perl
 
+# ------------------------------------------------------------------------- #
+#                                                                           #
+# Main package, instantiating the parser and a HTTP server over SSL used to #
+# ensure the data reception.                                                #
+#                                                                           #
+# ------------------------------------------------------------------------- #
+
 package Main;
 
 use Carp;
@@ -20,6 +27,9 @@ use constant END_TRANSFER   => -1;
 
 $| = 1;
 
+#
+# Verify if the given data is JSON.
+#
 sub isJSON {
     my $str = shift;
     my @chars = split("", $str);
