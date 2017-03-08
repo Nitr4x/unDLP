@@ -27,8 +27,7 @@ usage: server.pl [--e PASSWORD] [--help|h]
 	 --help|h: Display the helper.
 ```
 
-It is important to note that even if the server is started with a decryption password, it is still possible to
-handle raw data.
+It is important to note that even if the server is started with a decryption password, it is still possible to handle raw data.
 
 #### Client
 
