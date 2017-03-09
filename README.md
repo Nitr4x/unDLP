@@ -43,7 +43,7 @@ usage: unDLP.pl -f [FILE, ...] -d DESTINATION -m [HTTPS] [--e PASSWORD] [--size 
 	 --help|h: Display the helper.
 ```
 
-Note: Due to the fact that the transfer uses TLS, it is not mandatory to encrypt your data. Indeed, it terribly affects the transfer speed and could take ages to handle a large file. However, this functionality has been implemented for the next exfiltration methods. Nevertheless, it could a good way to counter MITM monitoring.
+Note: Due to the fact that the transfer uses TLS, it is not mandatory to encrypt your data. Indeed, it terribly affects the transfer speed and could take ages to handle a large file. However, this functionality has been implemented for the next exfiltration methods. Nevertheless, it could be a good way to counter MITM monitoring.
 
 ## Todo
 

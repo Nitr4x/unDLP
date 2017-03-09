@@ -8,6 +8,7 @@
 
 package Parser;
 
+use Carp;
 use Getopt::Long;
 use Moose;
 
@@ -70,7 +71,7 @@ sub parse {
         'delay=i'   =>  \$self->{delay},
         'size=i'    =>  \$self->{size},
         'help|h'    =>  \$self->{help}
-    );
+    ) or croak usage();
 
     if (scalar @args < 1 || $self->help || scalar $self->getFiles == 0 || !$self->dest || !$self->method) {
         usage()
