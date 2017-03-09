@@ -29,6 +29,8 @@ sub create {
             return $method->{className}->new(dest => $parser->dest, delay => $parser->delay, size => $parser->size, encryptionKey => $parser->encryptionKey);
         }
     }
+
+    die "$parser->{method} is not supported";
 }
 
 1;
